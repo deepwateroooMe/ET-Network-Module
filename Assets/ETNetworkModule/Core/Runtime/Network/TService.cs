@@ -7,6 +7,7 @@ using System.Net.Sockets;
 using UnityEngine;
 using static zFramework.Misc.Loom;
 namespace ET {
+    // 再封装一层 AService 的原因或是目的是什么：它管理了多个不同的信道，一个服务类型可以开启多个不同的信道
     public sealed class TService : AService {
 
         private readonly Dictionary<long, TChannel> idChannels = new Dictionary<long, TChannel>();
@@ -26,7 +27,8 @@ namespace ET {
             this.innArgs.Completed += this.OnComplete;
             this.acceptor.Bind(ipEndPoint);
             this.acceptor.Listen(1000); // 是说，当前服务，最多一次连接 1000 个客户端
-            PostNext(this.AcceptAsync); // 这里它用Loom, 可是感觉原理上是差不多呀？甚至ET 框架的包装更为精简，还是说ET NetService 里关于主线程＋异步线程的同步过程我没有包括进来？
+// 这里它用Loom, 可是感觉原理上是差不多呀？甚至ET 框架的包装更为精简，还是说ET NetService 里关于主线程＋异步线程的同步过程的逻辑我没有消化透彻，没有包括进来？
+            PostNext(this.AcceptAsync); 
         }
         private void OnComplete(object sender, SocketAsyncEventArgs e) {
             switch (e.LastOperation) {

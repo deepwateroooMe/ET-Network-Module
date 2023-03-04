@@ -22,7 +22,7 @@ namespace ET {
         private TimeInfo() {
             FrameTime = ClientNow;
         }
-        public static  void Update() => Instance.FrameTime = Instance.ClientNow;
+        public static  void Update() => Instance.FrameTime = Instance.ClientNow; // 这里起，服务器，客户端，桢同步的俢？
         // 根据时间戳获取时间 
         public DateTime ToDateTime(long timeStamp) => dt.AddTicks(timeStamp * 10000);
         // 线程安全

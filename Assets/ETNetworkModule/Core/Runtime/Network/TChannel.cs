@@ -5,14 +5,17 @@ using System.Net.Sockets;
 using UnityEngine;
 using static zFramework.Misc.Loom;
 namespace ET {
-    // 封装Socket,将回调push到主线程处理
+    
+// 封装Socket,将回调push到主线程处理
     public sealed class TChannel : AChannel {
         private readonly TService Service;
         private Socket socket;
+
         private SocketAsyncEventArgs innArgs = new SocketAsyncEventArgs();
         private SocketAsyncEventArgs outArgs = new SocketAsyncEventArgs();
         private readonly CircularBuffer recvBuffer = new CircularBuffer();
         private readonly CircularBuffer sendBuffer = new CircularBuffer();
+
         private bool isSending;
         private bool isConnected;
         private readonly PacketParser parser;
@@ -69,7 +72,6 @@ namespace ET {
                 this.StartSend();
             });
         }
-
         public override void Dispose() {
             if (this.IsDisposed) {
                 return;
@@ -90,18 +92,18 @@ namespace ET {
                 throw new Exception("TChannel已经被Dispose, 不能发送消息");
             }
             switch (this.Service.ServiceType) {
-            case ServiceType.Inner: { // 内网消息 
-                    int messageSize = (int)(stream.Length - stream.Position);
-                    if (messageSize > ushort.MaxValue * 16) {
-                        throw new Exception($"send packet too large: {stream.Length} {stream.Position}");
+                case ServiceType.Inner: { // 内网消息 
+                        int messageSize = (int)(stream.Length - stream.Position);
+                        if (messageSize > ushort.MaxValue * 16) {
+                            throw new Exception($"send packet too large: {stream.Length} {stream.Position}");
+                        }
+                        this.sendCache.WriteTo(0, messageSize);
+                        this.sendBuffer.Write(this.sendCache, 0, PacketParser.InnerPacketSizeLength);
+                        stream.GetBuffer().WriteTo(0, actorId); // actorId: 将这个 actorId 写入【实际上个更新】内存流，相应位置（头，都不需要序列化）
+                        // 内网消息，上下文，这里所作的事情应该只是，读取消息头，知道它是内网消息，内存流消息内容不用反序列化再序列化，直接更新内存流的 actorId, 就从内存上转发出去
+                        this.sendBuffer.Write(stream.GetBuffer(), (int)stream.Position, (int)(stream.Length - stream.Position));
+                        break;
                     }
-                    this.sendCache.WriteTo(0, messageSize);
-                    this.sendBuffer.Write(this.sendCache, 0, PacketParser.InnerPacketSizeLength);
-                    stream.GetBuffer().WriteTo(0, actorId); // actorId: 将这个 actorId 写入【实际上个更新】内存流，相应位置（头，都不需要序列化）
-                    // 内网消息，上下文，这里所作的事情应该只是，读取消息头，知道它是内网消息，内存流消息内容不用反序列化再序列化，直接更新内存流的 actorId, 就从内存上转发出去
-                    this.sendBuffer.Write(stream.GetBuffer(), (int)stream.Position, (int)(stream.Length - stream.Position));
-                    break;
-                }
                 case ServiceType.Outer: {
                     stream.Seek(Packet.ActorIdLength, SeekOrigin.Begin); // 外网不需要actorId, 所以快进，跳过 actorId 部分
                     ushort messageSize = (ushort)(stream.Length - stream.Position); // 读取消息长度：重要，是因为以大块为单位的流式读取，长短错了，就一定会读错消息 
@@ -283,3 +285,4 @@ namespace ET {
 #endregion
     }
 }
+

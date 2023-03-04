@@ -3,8 +3,8 @@ using System.IO;
 using System.Net;
 namespace ET {
     public abstract class AService : IDisposable { // 服务的抽象基类： 
+
         public ServiceType ServiceType { get; protected set; } // 内网消息，外网消息
-        
 // 这里，从最大，最小值，就是让他们尽量不要交叉         
         private long connectIdGenerater = int.MaxValue;
         public long CreateConnectChannelId(uint localConn) => (--this.connectIdGenerater << 32) | localConn; // localConn放在低32bit
@@ -17,8 +17,7 @@ namespace ET {
         public abstract bool IsDispose();
         protected abstract void Get(long id, IPEndPoint address);
         public abstract void Dispose();
-
-        protected abstract void Send(long channelId, long actorId, MemoryStream stream); // 去找个非抽象类的实例，看一下这个方法的实现 
+        protected abstract void Send(long channelId, long actorId, MemoryStream stream);
 
         protected void OnAccept(long channelId, IPEndPoint ipEndPoint) => this.AcceptCallback.Invoke(channelId, ipEndPoint);
         public void OnRead(long channelId, MemoryStream memoryStream) => this.ReadCallback.Invoke(channelId, memoryStream);
