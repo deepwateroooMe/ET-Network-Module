@@ -96,8 +96,8 @@ namespace ET {
         public async ETTask<IResponse> Call(IRequest request) {
             int rpcId = ++RpcId;
             RpcInfo rpcInfo = new RpcInfo(request); // 这个封装，回答一个问题：网络异步调用中，消息从哪里来，消息到哪里去？把异步调用，真正组装成流式语法，呵呵
-            requestCallbacks[rpcId] = rpcInfo;
-            request.RpcId = rpcId;
+            requestCallbacks[rpcId] = rpcInfo; // 这里是，注册回调的意思
+            request.RpcId = rpcId; // 标记的是：发消息的信使
             Send(request); // 这里是把消息发出去了，发给相应的服务器
             return await rpcInfo.Tcs; // 等待远程服务器处理，并返回异步结果，要拿结果 
         }
@@ -112,8 +112,8 @@ namespace ET {
             LastSendTime = TimeHelper.ClientNow();
             AService.SendStream(Id, actorId, memoryStream); // 从相对顶层的封装服务，向下走，走信道 channel， socket 等。理解一下，内存流上发消息，呵呵
 // 把内存流上的消息内容【不曾反序列化，不曾再序列化】写入发送信道缓存区，就把消息转发出去了【整个过程，省下对消息内容的反序列化与再序列化过程】
-    // 内网消息：走到信道，读个消息头，一看是内网消息，就【信道发送缓存区上 + 内存流上】更新一下 actorId 【内存流上更新 actorId, 我觉得是指针移动到消息内容头】,
-    // 外网消息：不要 actorId, 只更新消息的长短
+            // 内网消息：走到信道，读个消息头，一看是内网消息，就【信道发送缓存区上 + 内存流上】更新一下 actorId 【内存流上更新 actorId, 我觉得是指针移动到消息内容头】,
+            // 外网消息：不要 actorId, 只更新消息的长短
         }
     }
 }

@@ -1,11 +1,9 @@
-﻿namespace ET
-{
-    public static class ErrorCore
-    {
+﻿namespace ET {
+    public static class ErrorCore {
         public const int ERR_MyErrorCode = 110000;
         
         public const int ERR_KcpConnectTimeout = 100205;
-        public const int ERR_PeerDisconnect = 100208;
+        public const int ERR_PeerDisconnect = 100208; // 不明白，这个错误的是什么意思 ?
         public const int ERR_SocketCantSend = 100209;
         public const int ERR_SocketError = 100210;
         public const int ERR_KcpWaitSendSizeTooLarge = 100211;
@@ -57,20 +55,16 @@
 
         public const int ERR_Cancel = 200001;
 
-        public static bool IsRpcNeedThrowException(int error)
-        {
-            if (error == 0)
-            {
+        public static bool IsRpcNeedThrowException(int error) {
+            if (error == 0) {
                 return false;
             }
             // ws平台返回错误专用的值
-            if (error == -1)
-            {
+            if (error == -1) {
                 return false;
             }
 
-            if (error > ERR_Exception)
-            {
+            if (error > ERR_Exception) {
                 return false;
             }
 

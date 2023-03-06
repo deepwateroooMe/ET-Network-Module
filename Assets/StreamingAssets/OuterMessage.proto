@@ -237,4 +237,3 @@ message M2C_TransferMap // IActorLocationResponse
 	int32 Error = 91;
 	string Message = 92;
 }
- 

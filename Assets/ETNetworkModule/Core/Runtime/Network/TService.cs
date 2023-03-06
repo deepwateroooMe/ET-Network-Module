@@ -102,8 +102,8 @@ namespace ET {
             this.idChannels.Remove(id);
         }
         protected override void Send(long channelId, long actorId, MemoryStream stream) {
-            try {
-                TChannel aChannel = this.Get(channelId);
+            try { 
+                TChannel aChannel = this.Get(channelId); // 这里是对的，仍然能够拿到或是创建信道
                 if (aChannel == null) {
                     this.OnError(channelId, ErrorCore.ERR_SendMessageNotFoundTChannel);
                     return;

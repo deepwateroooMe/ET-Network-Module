@@ -1,0 +1,46 @@
+% Created 2023-03-06 Mon 11:58
+\documentclass[9pt, b5paper]{article}
+\usepackage{xeCJK}
+\usepackage[T1]{fontenc}
+\usepackage{bera}
+\usepackage[scaled]{beraserif}
+\usepackage[scaled]{berasans}
+\usepackage[scaled]{beramono}
+\usepackage[cache=false]{minted}
+\usepackage{xltxtra}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{multirow}
+\usepackage{multicol}
+\usepackage{float}
+\usepackage{textcomp}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{latexsym}
+\usepackage{natbib}
+\usepackage{geometry}
+\geometry{left=1.2cm,right=1.2cm,top=1.5cm,bottom=1.2cm}
+\usepackage[xetex,colorlinks=true,CJKbookmarks=true,linkcolor=blue,urlcolor=blue,menucolor=blue]{hyperref}
+\newminted{common-lisp}{fontsize=\footnotesize} 
+\author{deepwaterooo}
+\date{\today}
+\title{unity游戏热更新服务端服务器}
+\hypersetup{
+  pdfkeywords={},
+  pdfsubject={},
+  pdfcreator={Emacs 28.2 (Org mode 8.2.7c)}}
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+
+\section{昨天晚上运行的时候，出一个错}
+\label{sec-1}
+\begin{itemize}
+\item 客户端发Ping 到服务器，服务器返回一个时间消息
+\item 客户端再接收 OnAccept() 或是 OnReceive() 的时候，抛出了一个底层的异常
+\item 今天晚上回家，休息前再运行一遍
+\end{itemize}
+% Emacs 28.2 (Org mode 8.2.7c)
+\end{document}

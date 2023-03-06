@@ -1,0 +1,8 @@
+#+latex_class: cn-article
+#+title: unity游戏热更新服务端服务器
+#+author: deepwaterooo 
+
+* 昨天晚上运行的时候，出一个错
+- 客户端发Ping 到服务器，服务器返回一个时间消息
+- 客户端再接收 OnAccept() 或是 OnReceive() 的时候，抛出了一个底层的异常
+- 今天晚上回家，休息前再运行一遍

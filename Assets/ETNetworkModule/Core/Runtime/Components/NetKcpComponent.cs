@@ -5,8 +5,8 @@ using UnityEngine;
 namespace ET {
 
     [DefaultExecutionOrder(-97)] 
-// 不使用ET 双端框架，是因为不想使用它的事件系统【因为不想自己的热更新程序域重构, 加注标签或是改装为模块化】。
 // 那么也就意味着：客户端与服务器的代码重复；这个类，或是模块，服务器端会有非 MonoBehaviour 的模块
+// 上面的考虑是对的：这个客户端是可以直接与ET 框架通信的
     public class NetKcpComponent : MonoBehaviour { // 直接定义为组件：继承自 MonoBehaviour, 是客户端是这样的逻辑。
         public AService Service;
         int sessionStreamDispatcherType;
@@ -14,9 +14,9 @@ namespace ET {
         
 // 这个网络模块的组件：它也是需要有必要的初始化的。它的初始化，就是配置到能够上下文同步
         private void Awake() => Init(SessionStreamDispatcherType.SessionStreamDispatcherClientOuter); // 定义为，客户端
-        private void Init(int sessionStreamDispatcherType) { // 组件的类型： 
+        private void Init(int sessionStreamDispatcherType) { // 组件的类型：脚本加载的时候，初始化用这个方法 
             this.sessionStreamDispatcherType = sessionStreamDispatcherType;
-            Service = new TService(ServiceType.Outer);
+            Service = new TService(ServiceType.Outer); // 注意一下：这里说服务类型是，对外的
             Service.ErrorCallback += (channelId, error) => OnError(channelId, error);
             Service.ReadCallback += (channelId, Memory) => OnRead(channelId, Memory);
             NetServices.Add(Service);
@@ -71,11 +71,11 @@ namespace ET {
             return session;
         }
         public Session Create(IPEndPoint realIPEndPoint) {
-            long channelId = RandomHelper.RandInt64();
-            Session session = AddChildWithId(channelId, Service);
-            session.RemoteAddress = realIPEndPoint;
+            long channelId = RandomHelper.RandInt64(); // 这里是，随时生成的
+            Session session = AddChildWithId(channelId, Service); // 脚本初始化的时候，也会开启一个对外的服务
+            session.RemoteAddress = realIPEndPoint; // 远程服务器的地址
             session.IdleChecker = NetServices.checkInteral;
-            Service.GetOrCreate(session.Id, realIPEndPoint);
+            Service.GetOrCreate(session.Id, realIPEndPoint); // 去拿，或是创建一个，到这个远程服务器的会话框 
             return session;
         }
         public Session GetSession(long id) {

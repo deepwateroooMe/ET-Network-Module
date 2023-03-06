@@ -13,11 +13,11 @@ namespace ET {
         public long delay; // 延迟值
         Session session;
 
-        public Ping(Session session) {
+        public Ping(Session session) { // 就是说，用这个会话框，来发送来往在线消息 
             InstanceId = IdGenerater.Instance.GenerateInstanceId();
-            this.session = session;
-            _ = PingAsync();
-        }
+            this.session = session; // 因为返回在线消息，也是需要一个会话框的
+            _ = PingAsync(); // 这明白： _ 这个符号是什么意思？是
+        } 
         public void Dispose() {
             if (this.IsDisposed) {
                 return;
@@ -26,8 +26,8 @@ namespace ET {
         }
         private async ETTask PingAsync() {
             long instanceId = InstanceId;
-            while (true) {
-                if (InstanceId != instanceId) {
+            while (true) { // 这个是，无限循环的
+                if (InstanceId != instanceId) { // 什么情况下，会出现这种情况？这个 ping 消息，过期，或是什么意外？
                     return;
                 }
                 long time1 = TimeHelper.ClientNow();

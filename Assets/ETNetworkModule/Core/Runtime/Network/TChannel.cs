@@ -6,7 +6,7 @@ using UnityEngine;
 using static zFramework.Misc.Loom;
 namespace ET {
     
-// 封装Socket,将回调push到主线程处理
+// 封装Socket,将回调push到主线程处理 
     public sealed class TChannel : AChannel {
         private readonly TService Service;
         private Socket socket;
@@ -27,7 +27,7 @@ namespace ET {
                     Post(() => OnConnectComplete(e));
                     break;
                 case SocketAsyncOperation.Receive:
-                    Post(() => OnRecvComplete(e));
+                    Post(() => OnRecvComplete(e)); // 它说是，走到这里出错的，来自于Loom Update(), 出错的地方是在 ping 消息之后？回想一下昨天那个错误信息，把这块儿看具体点儿
                     break;
                 case SocketAsyncOperation.Send:
                     Post(() => OnSendComplete(e));
@@ -104,7 +104,7 @@ namespace ET {
                         this.sendBuffer.Write(stream.GetBuffer(), (int)stream.Position, (int)(stream.Length - stream.Position));
                         break;
                     }
-                case ServiceType.Outer: {
+            case ServiceType.Outer: { // 应该是可以走到这里来： 
                     stream.Seek(Packet.ActorIdLength, SeekOrigin.Begin); // 外网不需要actorId, 所以快进，跳过 actorId 部分
                     ushort messageSize = (ushort)(stream.Length - stream.Position); // 读取消息长度：重要，是因为以大块为单位的流式读取，长短错了，就一定会读错消息 
                     this.sendCache.WriteTo(0, messageSize); // 本地发送缓存 
@@ -113,9 +113,9 @@ namespace ET {
                     break;
                 }
             }
-            if (!this.isSending) {
+            if (!this.isSending) { 
                 // this.StartSend();
-                this.Service.NeedStartSend.Add(this.Id);
+                this.Service.NeedStartSend.Add(this.Id); // 缓存好，准备下一桢Update() 的时候，发送出去：
             }
         }
         private void ConnectAsync() {
@@ -160,7 +160,7 @@ namespace ET {
             }
         }
         private void OnRecvComplete(object o) {
-            this.HandleRecv(o);
+            this.HandleRecv(o); // <<<<<<<<<<<<<<<<<<<< 
             if (this.socket == null) {
                 return;
             }
@@ -175,9 +175,9 @@ namespace ET {
                 this.OnError((int)e.SocketError);
                 return;
             }
-            if (e.BytesTransferred == 0) {
-                this.OnError(ErrorCore.ERR_PeerDisconnect);
-                return;
+            if (e.BytesTransferred == 0) { // ERR_PeerDisconnect: 被抛出了这个异常：就是客户端发一个Ping 消息给服务器；服务器想写一个时间回来，可是这里去读的时候出错了
+                this.OnError(ErrorCore.ERR_PeerDisconnect); // <<<<<<<<<<<<<<<<<<<< 感觉昨天晚上运行时抛出的错误有点儿底层。无论是概念上，还是底层原理上，都不太懂。
+                return; // 要仔细熟悉这一块儿，今天晚上回家睡前再运往二遍，截个日志 
             }
             this.recvBuffer.LastIndex += e.BytesTransferred;
             if (this.recvBuffer.LastIndex == this.recvBuffer.ChunkSize) {
