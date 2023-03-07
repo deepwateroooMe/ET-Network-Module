@@ -1,8 +1,9 @@
 #+latex_class: cn-article
-#+title: unity游戏热更新服务端服务器
+#+title: ET-EUI 服务器 + 当前客户端（作为与服务器的网络交互部分）
 #+author: deepwaterooo 
 
 * 昨天晚上运行的时候，出一个错
 - 客户端发Ping 到服务器，服务器返回一个时间消息
 - 客户端再接收 OnAccept() 或是 OnReceive() 的时候，抛出了一个底层的异常
+- 这个Ping 消息比较特殊，既是外网消息，但又只有一个 rpcID. 跳过了这个，便没有消息内容了。感觉原因可能是这个
 - 今天晚上回家，休息前再运行一遍

@@ -105,7 +105,7 @@ namespace ET {
         public void Send(IMessage message) => Send(0, message);
         public void Send(long actorId, IMessage message) {
             (ushort opcode, MemoryStream stream) = MessageSerializeHelper.MessageToStream(message);
-            OpcodeHelper.LogMsg(0, opcode, message);
+            OpcodeHelper.LogMsg(0, opcode, message); // 确认一下：是不是这里出错打印的日志，因为消息为空呀
             Send(actorId, stream);
         }
         public void Send(long actorId, MemoryStream memoryStream) { // 消息序列化到内存流了，现在就是内存流上发消息了

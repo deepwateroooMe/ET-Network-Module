@@ -101,14 +101,14 @@ namespace ET {
             }
             this.idChannels.Remove(id);
         }
-        protected override void Send(long channelId, long actorId, MemoryStream stream) {
+        protected override void Send(long channelId, long actorId, MemoryStream stream) { // 这里是，发送消息的地方
             try { 
                 TChannel aChannel = this.Get(channelId); // 这里是对的，仍然能够拿到或是创建信道
                 if (aChannel == null) {
                     this.OnError(channelId, ErrorCore.ERR_SendMessageNotFoundTChannel);
                     return;
                 }
-                aChannel.Send(actorId, stream);
+                aChannel.Send(actorId, stream); // 这里就是从信道上将消息发出去
             }
             catch (Exception e) {
                 Debug.LogError(e);
