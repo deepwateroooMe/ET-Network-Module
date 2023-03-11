@@ -11,7 +11,6 @@ using UnityEngine;
 using UnityEngine.LowLevel;
 namespace zFramework.Misc {
     // 是一个对Unity 多线程进行管理的库。管理的原理也很简单：需要回调到主线程的本地缓存，异步线程执行的本地缓存，向主线程的投放同步更新等。因为是多线程环境，很多地主要上锁
-    // 感觉好像是懂了
     public static class Loom { 
 
         static SynchronizationContext context; // 标记，记住主线程 

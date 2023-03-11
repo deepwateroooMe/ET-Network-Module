@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 namespace ET {
+    // 帮助打印日志住处
     public static class OpcodeHelper {
         private static readonly HashSet<ushort> ignoreDebugLogMessageSet = new HashSet<ushort> { // 这个集合里的相关日志，不用打印 
             Opcode.C2G_Ping,
@@ -18,7 +19,7 @@ namespace ET {
             if (!IsNeedLogMessage(opcode)) {
                 return;
             }
-            Debug.Log($"zone: {zone} {message}");
+            Debug.Log($"zone: {zone} {message}"); // 错误是从这里抛出来的
         }
         public static void LogMsg(ushort opcode, long actorId, object message) {
             if (!Application.isEditor && !Debug.isDebugBuild) { // 不是编辑器并且不是调试包的情况下不输出log
