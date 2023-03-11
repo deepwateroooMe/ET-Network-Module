@@ -9,6 +9,7 @@ using static zFramework.Misc.Loom;
 namespace ET {
     // 再封装一层 AService 的原因或是目的是什么：它管理了多个不同的信道，一个服务类型可以开启多个不同的信道
     public sealed class TService : AService {
+        private const string TAG = "TService";
 
         private readonly Dictionary<long, TChannel> idChannels = new Dictionary<long, TChannel>();
         private readonly SocketAsyncEventArgs innArgs = new SocketAsyncEventArgs();
@@ -117,7 +118,7 @@ namespace ET {
         public override void Update() {
             foreach (var channelId in NeedStartSend) {
                 TChannel tChannel = this.Get(channelId);
-                tChannel?.Update(); // 开始发送信道发送缓存区上的数据
+                tChannel?.Update(); // 开始发送信道发送缓存区上的数据。这里的 tChannel 是非空的
             }
             this.NeedStartSend.Clear();
         }
@@ -125,3 +126,5 @@ namespace ET {
 #endregion
     }
 }
+
+

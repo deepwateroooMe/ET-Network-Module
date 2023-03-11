@@ -5,7 +5,6 @@ using System.Linq;
 using System.Net;
 using UnityEngine;
 namespace ET {
-
     public readonly struct RpcInfo { // 这个封装：与以前一样吗？无所谓，就是既有发送端，也有回收的 IResponse, 包装在任务里
         public readonly IRequest Request;
         public readonly ETTask<IResponse> Tcs;
@@ -16,6 +15,8 @@ namespace ET {
     }
 
     public sealed class Session {
+        private const string TAG = "Session";
+
         public bool IsDisposed => this.Id == 0;
 
         public int AcceptTimeout = 5000; // 5 秒

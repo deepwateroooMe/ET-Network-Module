@@ -13,4 +13,34 @@
 - 客户端： 
   
 [[./pic/readme_20230307_082732.png]]
-- 再具体看一下
+* 服务器端的这个错误
+- Windows 10 上 *想要使用键绑定来自 Visual Studio 中从 emacs 中打开当前文件，但是暂时实现不了，先放一下* 。下午或是晚上有精力再弄
+- 这里可以确定，用这个客户端小项目自带的服务器（是从ET6.0 版本构建生成的）是可以运行得通的。
+- 现是用现ET-EUI, 不确定是构建自ET 的哪个版本，生成的 C2R_Login 消息的长度还像是不一样，多了或是少了内个空行，也就意味着服务器端与客户端的定义同一个C2R_Login消息的长短不一样。想去比较两个版本的 Proto2CS 的 .proto 转 .cs 过程中自动添加与删除了空行的问题，想要把服务器端与客户端的同类消息的长短确定一致
+- 是客户端的消息已经发送，服务器准备接收消息的时候，服务器端出的错. 今天上午把这个错误信息从服务器端追到底，解决掉。
+  #+BEGIN_SRC text
+2023-03-10 11:29:49.0022 127.0.0.1:56434 18 ProtoBuf.ProtoException: Invalid wire-type; this usually means you have over-written a file without truncating or setting the length; see https://stackoverflow.com/q/2152978/23354         
+ProtoBuf.ProtoReader.ReadSingle() in C:\code\protobuf-net\src\protobuf-net\ProtoReader.cs:line 857 
+proto_28(Object , ProtoReader )                                                                                                                                                                   
+ProtoBuf.ProtoReader.ReadTypedObject(Object value, Int32 key, ProtoReader reader, Type type) in C:\code\protobuf-net\src\protobuf-net\ProtoReader.cs:line 576 
+proto_26(Object , ProtoReader )                                                                                                                                                                   
+ProtoBuf.Meta.TypeModel.DeserializeCore(ProtoReader reader, Type type, Object value, Boolean noAutoCreate) in C:\code\protobuf-net\src\protobuf-net\Meta\TypeModel.cs:line 718                                
+ProtoBuf.Meta.TypeModel.Deserialize(Stream source, Object value, Type type, SerializationContext context) in C:\code\protobuf-net\src\protobuf-net\Meta\TypeModel.cs:line 590                                 
+ProtoBuf.Meta.TypeModel.Deserialize(Stream source, Object value, Type type) in C:\code\protobuf-net\src\protobuf-net\Meta\TypeModel.cs:line 570                                                   
+ProtobufHelper.FromStream(Type type, MemoryStream stream) in F:\ET-EUI\Unity\Codes\Model\Core\ProtobufHelper.cs:line 32  // <<<<<<<<<<<<<<<<<<<< 源码可以追到这里来
+MessageSerializeHelper.DeserializeFrom(UInt16 opcode, Type type, MemoryStream memoryStream) in F:\ET-EUI\Unity\Codes\Model\Module\Message\MessageSerializeHelper.cs:line 8  
+SessionStreamDispatcherServerOuter.Dispatch(Session session, MemoryStream memoryStream) in F:\ET-EUI\Server\Hotfix\Demo\Session\SessionStreamDispatcherServerOuter.cs:line 12           
+SessionStreamDispatcherSystem.Dispatch(SessionStreamDispatcher self, Int32 type, Session session, MemoryStream memoryStream) in F:\ET-EUI\Unity\Codes\Hotfix\Module\Message\SessionStreamDispatcherSystem.cs:line 59           
+NetKcpComponentSystem.OnRead(NetKcpComponent self, Int64 channelId, MemoryStream memoryStream) in F:\ET-EUI\Unity\Codes\Hotfix\Module\Message\NetKcpComponentSystem.cs:line 50                             
+NetKcpComponentAwake1System.<>c__DisplayClass0_0.<Awake>b__1(Int64 channelId, MemoryStream Memory) in F:\ET-EUI\Unity\Codes\Hotfix\Module\Message\NetKcpComponentSystem.cs:line 26                         
+AService.OnRead(Int64 channelId, MemoryStream memoryStream) in F:\ET-EUI\Unity\Assets\Mono\Module\Network\AService.cs:line 35                                                                              
+TChannel.OnRead(MemoryStream memoryStream) in F:\ET-EUI\Unity\Assets\Mono\Module\NetworkTCP\TChannel.cs:line 301                                                                                           
+TChannel.OnRead(MemoryStream memoryStream) in F:\ET-EUI\Unity\Assets\Mono\Module\NetworkTCP\TChannel.cs:line 301                                                                                           
+TChannel.HandleRecv(Object o) in F:\ET-EUI\Unity\Assets\Mono\Module\NetworkTCP\TChannel.cs:line 213                                                                                                        
+TChannel.StartRecv() in F:\ET-EUI\Unity\Assets\Mono\Module\NetworkTCP\TChannel.cs:line 171                                                                                                                 
+TChannel.<.ctor>b__12_0() in F:\ET-EUI\Unity\Assets\Mono\Module\NetworkTCP\TChannel.cs:line 69                                                                                                             
+ThreadSynchronizationContext.Update() in F:\ET-EUI\Unity\Assets\Mono\Core\ThreadSynchronizationContext.cs:line 34                                                                                          
+Game.Update() in F:\ET-EUI\Unity\Codes\Model\Core\Entity\Game.cs:line 38                                                                                                                                   
+Program.Main(String[] args) in F:\ET-EUI\Server\App\Program.cs:line 50  
+  #+END_SRC
+

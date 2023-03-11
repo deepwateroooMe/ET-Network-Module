@@ -8,9 +8,11 @@ namespace ET {
 // 封装Socket,将回调push到主线程处理 
     public sealed class TChannel : AChannel {
         private const string TAG = "TChannel";
+        
         private readonly TService Service;
         private Socket socket;
 
+        
         private SocketAsyncEventArgs innArgs = new SocketAsyncEventArgs();
         private SocketAsyncEventArgs outArgs = new SocketAsyncEventArgs();
         private readonly CircularBuffer recvBuffer = new CircularBuffer();
@@ -107,7 +109,7 @@ namespace ET {
                     stream.Seek(Packet.ActorIdLength, SeekOrigin.Begin); // 外网不需要actorId, 所以快进，跳过 actorId 部分
                     // 对呀对呀，问题就在这里了呀：这个Ping 消息它除了前面的 actorId 的头，它是没有内容的。当快进完了，就没有内容了？今天晚上回去后再确认一下
                     ushort messageSize = (ushort)(stream.Length - stream.Position); // 读取消息长度：重要，是因为以大块为单位的流式读取，长短错了，就一定会读错消息
-                    Debug.Log(TAG + " messageSize: " + messageSize);
+                    Debug.Log(TAG + " messageSize: " + messageSize);// 17
 
                     this.sendCache.WriteTo(0, messageSize); // 本地发送缓存 
                     this.sendBuffer.Write(this.sendCache, 0, PacketParser.OuterPacketSizeLength); // 写入，信道的发送缓存区：先写入的是，消息的长度
@@ -115,8 +117,7 @@ namespace ET {
                     break;
                 }
             }
-            if (!this.isSending) { 
-                // this.StartSend();
+            if (!this.isSending) {
                 this.Service.NeedStartSend.Add(this.Id); // 缓存好，准备下一桢Update() 的时候，发送出去：
             }
         }
@@ -223,7 +224,7 @@ namespace ET {
                         return;
                     }
                     // 没有数据需要发送
-                    if (this.sendBuffer.Length == 0) {
+                    if (this.sendBuffer.Length == 0) { // 这里是想要打印一个日志
                         this.isSending = false;
                         return;
                     }
@@ -287,3 +288,7 @@ namespace ET {
 #endregion
     }
 }
+
+
+
+
