@@ -5,20 +5,18 @@ using System.Net.Sockets;
 using UnityEngine;
 using static zFramework.Misc.Loom;
 namespace ET {
+    
 // 封装Socket,将回调push到主线程处理 
     public sealed class TChannel : AChannel {
-        private const string TAG = "TChannel";
-        
         private readonly TService Service;
         private Socket socket;
 
-        
         private SocketAsyncEventArgs innArgs = new SocketAsyncEventArgs();
         private SocketAsyncEventArgs outArgs = new SocketAsyncEventArgs();
         private readonly CircularBuffer recvBuffer = new CircularBuffer();
         private readonly CircularBuffer sendBuffer = new CircularBuffer();
 
-        private bool isSending; 
+        private bool isSending;
         private bool isConnected;
         private readonly PacketParser parser;
         private readonly byte[] sendCache = new byte[Packet.OpcodeLength + Packet.ActorIdLength];
@@ -68,7 +66,8 @@ namespace ET {
             this.RemoteAddress = (IPEndPoint)socket.RemoteEndPoint;
             this.isConnected = true;
             this.isSending = false;
-            PostNext(() => { // 下一帧再开始读写：这里会存在慢一桢的问题吗？应该是感觉不到的，1 秒 60 桢
+            // 下一帧再开始读写：这里会存在慢一桢的问题吗？应该是感觉不到的，1 秒 60 桢
+            PostNext(() => {
                 this.StartRecv();
                 this.StartSend();
             });
@@ -107,17 +106,15 @@ namespace ET {
                     }
             case ServiceType.Outer: { // 应该是可以走到这里来： 
                     stream.Seek(Packet.ActorIdLength, SeekOrigin.Begin); // 外网不需要actorId, 所以快进，跳过 actorId 部分
-                    // 对呀对呀，问题就在这里了呀：这个Ping 消息它除了前面的 actorId 的头，它是没有内容的。当快进完了，就没有内容了？今天晚上回去后再确认一下
-                    ushort messageSize = (ushort)(stream.Length - stream.Position); // 读取消息长度：重要，是因为以大块为单位的流式读取，长短错了，就一定会读错消息
-                    Debug.Log(TAG + " messageSize: " + messageSize);// 17
-
+                    ushort messageSize = (ushort)(stream.Length - stream.Position); // 读取消息长度：重要，是因为以大块为单位的流式读取，长短错了，就一定会读错消息 
                     this.sendCache.WriteTo(0, messageSize); // 本地发送缓存 
                     this.sendBuffer.Write(this.sendCache, 0, PacketParser.OuterPacketSizeLength); // 写入，信道的发送缓存区：先写入的是，消息的长度
                     this.sendBuffer.Write(stream.GetBuffer(), (int)stream.Position, (int)(stream.Length - stream.Position)); // 再写入，从内存流上读取的消息的内容，准备就绪，接下来就可以，从消息 accept 信道将消息发出去了
                     break;
                 }
             }
-            if (!this.isSending) {
+            if (!this.isSending) { 
+                // this.StartSend();
                 this.Service.NeedStartSend.Add(this.Id); // 缓存好，准备下一桢Update() 的时候，发送出去：
             }
         }
@@ -180,7 +177,7 @@ namespace ET {
             }
             if (e.BytesTransferred == 0) { // ERR_PeerDisconnect: 被抛出了这个异常：就是客户端发一个Ping 消息给服务器；服务器想写一个时间回来，可是这里去读的时候出错了
                 this.OnError(ErrorCore.ERR_PeerDisconnect); // <<<<<<<<<<<<<<<<<<<< 感觉昨天晚上运行时抛出的错误有点儿底层。无论是概念上，还是底层原理上，都不太懂。
-                return; // 要仔细熟悉这一块儿，今天晚上回家睡前再运往二遍，截个日志 
+                return; // 要仔细熟悉这一块儿，今天晚上回家睡前再运行一遍，截个日志 
             }
             this.recvBuffer.LastIndex += e.BytesTransferred;
             if (this.recvBuffer.LastIndex == this.recvBuffer.ChunkSize) {
@@ -208,7 +205,7 @@ namespace ET {
             }
         }
         public void Update() {
-            this.StartSend(); // 这里做的事是：发送这个信道上的消息 
+            this.StartSend();
         }
         private void StartSend() {
             if (!this.isConnected) {
@@ -224,7 +221,7 @@ namespace ET {
                         return;
                     }
                     // 没有数据需要发送
-                    if (this.sendBuffer.Length == 0) { // 这里是想要打印一个日志
+                    if (this.sendBuffer.Length == 0) {
                         this.isSending = false;
                         return;
                     }
@@ -255,7 +252,7 @@ namespace ET {
             }
             SocketAsyncEventArgs e = (SocketAsyncEventArgs)o;
             if (e.SocketError != SocketError.Success) {
-                this.OnError((int)e.SocketError); // 看一下它这里，发送出错的情况：
+                this.OnError((int)e.SocketError);
                 return;
             }
             if (e.BytesTransferred == 0) {
@@ -288,7 +285,3 @@ namespace ET {
 #endregion
     }
 }
-
-
-
-

@@ -6,7 +6,8 @@ using UnityEngine;
 using UnityEngine.UI;
 // 客户端逻辑：这个项目整个的是客户端逻辑【原项目主不要双端，不要热更新，X不要服务器X?】不要服务器是不可能的，一定是要服务器，这个客户端才能够也服务器通信。它是可以与ET 框架的服务器端直接通信的
 // 但我需要的是服务器逻辑，我仍然需要使用ET7 的头。就是把斗地主样例里的头【注册登录】，填充到 ET7 里去。【现在就是直接使用自己现有的ET-EUI 了】
-public class Client : MonoBehaviour { 
+public class Client : MonoBehaviour {
+    private const string TAG = "Client";
     public string address = "127.0.0.1";
     public const int port = 10002; // 这个端口：是用来作什么用的 ?
 
@@ -62,17 +63,18 @@ public class Client : MonoBehaviour {
             Session forgate = NetKcpComponent.Create(NetworkHelper.ToIPEndPoint(address));
             R2C_Login r2CLogin = (R2C_Login)await forgate.Call(new C2R_Login() { Account=username.text, Password=password.text });
             forgate?.Dispose();
-            Debug.Log($"{nameof(Client)}: "); // 这里打个客户端名字？
+
+            Debug.Log(TAG + " r2CLogin.Address: " + r2CLogin.Address);
             // 创建一个gate Session,并且保存到SessionComponent中
             session = NetKcpComponent.Create(NetworkHelper.ToIPEndPoint(r2CLogin.Address)); // 这里拿到的地址，应该是网关服的地址
             session.ping = new ET.Ping(session); // 这是它的一个基本通信测试：测试这个消息与服务器的通信。可是现在，这个过程，TChannel 抛异常了
             session.ping.OnPingRecalculated += (delay) => { ping.text = $"Ping: {delay}"; };
             // 这里可能有两处从服务器返回消息的：一个是Ping, 一个是登录返回，两处要知道是哪处出错了？打几个日志，区分一下Ping 与登录消息，看是哪个出错的？
             G2C_LoginGate g2CLoginGate = (G2C_LoginGate)await session.Call(new C2G_LoginGate() { Key = r2CLogin.Key, GateId = r2CLogin.GateId });
-            Debug.Log("登陆gate成功!");
+            Debug.Log("登陆gate成功!"); // 这里没有问题。登录成功。
             // 登录 map 服务器
             // 进入地图
-            var request = new C2G_EnterMap() ;
+            var request = new C2G_EnterMap() ; // 这里可以改成自己的：进入某个特定的游戏 
             G2C_EnterMap map = await session.Call(request) as G2C_EnterMap;
             Debug.Log($"进入地图成功：  Net_id = {map.MyId}");
         }
@@ -83,4 +85,3 @@ public class Client : MonoBehaviour {
         return isconnected;
     }
 }
-

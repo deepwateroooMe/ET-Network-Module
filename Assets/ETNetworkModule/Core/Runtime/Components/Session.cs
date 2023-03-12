@@ -104,9 +104,9 @@ namespace ET {
         }
         public void Reply(IResponse message) => Send(0, message);
         public void Send(IMessage message) => Send(0, message);
-        public void Send(long actorId, IMessage message) {
+        public void Send(long actorId, IMessage message) { // 确认了这个方法，ET 里也是这么发的，那么问题仍然是在服务器端
             (ushort opcode, MemoryStream stream) = MessageSerializeHelper.MessageToStream(message);
-            OpcodeHelper.LogMsg(0, opcode, message); // 确认一下：是不是这里出错打印的日志，因为消息为空呀
+            OpcodeHelper.LogMsg(0, opcode, message); // 确认过：这里打出来没有问题
             Send(actorId, stream);
         }
         public void Send(long actorId, MemoryStream memoryStream) { // 消息序列化到内存流了，现在就是内存流上发消息了

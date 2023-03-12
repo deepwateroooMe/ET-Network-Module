@@ -19,14 +19,24 @@
 - 【猜测：】现是用现ET-EUI, 不确定是构建自ET 的哪个版本，生成的 C2R_Login 消息的长度还像是不一样，多了或是少了内个空行，也就意味着服务器端与客户端的定义同一个C2R_Login消息的长短不一样。想去比较两个版本的 Proto2CS 的 .proto 转 .cs 过程中自动添加与删除了空行的问题，想要把服务器端与客户端的同类消息的长短确定一致
 - 【上面仍然是不对】：
 - 是客户端的消息已经发送，服务器准备接收消息的时候，服务器端出的错. 今天上午把这个错误信息从服务器端追到底，解决掉。
-
 * root cause
 - 可以找到最终的原因：是因为这个ET-EUI 先前自己测试的时候添加过不少测试，中间有很多 protobuf 消息可能会存在重复或是混乱。
 - 现能找到原因：当客户端发C2R_Login 登录请求消息时，当前的ET-EUI 不知道什么原因， opcode 仍然是 10023, 但它试图反序列化时将消息类型C2R_Login 弄成了是其它类型。
-- 接下来会更正自己的这个服务器端的错误
+- 接下来会更正自己的这个服务器端的错误：在没有环境可以运行的情况下，检查梳理一遍相关的逻辑，更正必要的可能会引起出错的地方
 
 [[./pic/readme_20230311_092732.png]]
-
-
-
-
+- 现在检查过的双端公认的消息类型与 opcode 码包括：目前确认了这6+2 种类型。等着晚上回家，可以再测试一下最后一步进入地图
+- 暂时写到这里，等晚上测试过之后，再往前进行。
+#+BEGIN_SRC csharp
+public static partial class Opcode {
+    public const ushort C2G_Ping = 10002;
+    public const ushort G2C_Ping = 10003;
+    public const ushort C2R_Login = 10023;
+    public const ushort R2C_Login = 10024;
+    public const ushort C2G_LoginGate = 10025;
+    public const ushort G2C_LoginGate = 10026;
+// 下面的两个，服务器端仍需要作调整，需要检查一下，弄对了没有？
+    public const ushort C2G_EnterMap = 10008;
+    public const ushort G2C_EnterMap = 10009;
+}
+#+END_SRC
