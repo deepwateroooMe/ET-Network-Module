@@ -4,13 +4,11 @@ using System.Data;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-// 客户端逻辑：这个项目整个的是客户端逻辑【原项目主不要双端，不要热更新，X不要服务器X?】不要服务器是不可能的，一定是要服务器，这个客户端才能够也服务器通信。它是可以与ET 框架的服务器端直接通信的
-// 但我需要的是服务器逻辑，我仍然需要使用ET7 的头。就是把斗地主样例里的头【注册登录】，填充到 ET7 里去。【现在就是直接使用自己现有的ET-EUI 了】
+// 客户端逻辑：这个项目整个的是客户端逻辑。不要服务器是不可能的，一定是要服务器，这个客户端才能够也服务器通信。它是可以与ET 框架的服务器端直接通信的
 public class Client : MonoBehaviour {
     private const string TAG = "Client";
     public string address = "127.0.0.1";
     public const int port = 10002; // 这个端口：是用来作什么用的 ?
-
     TextMeshProUGUI text;  // 给个提示信息：你没有帐房，请先注册；注册成功；登录失败等
     public Button button; // 这两个按钮，但是界面上实际上只有一个。 login Button
     // public Button signUpbutton; // 注册: 这个可以暂不要就可以了呀。界面上没有这个按钮，所以把它去掉了
@@ -75,8 +73,9 @@ public class Client : MonoBehaviour {
             // 登录 map 服务器
             // 进入地图
             var request = new C2G_EnterMap() ; // 这里可以改成自己的：进入某个特定的游戏 
-            G2C_EnterMap map = await session.Call(request) as G2C_EnterMap;
-            Debug.Log($"进入地图成功：  Net_id = {map.MyId}");
+            G2C_EnterMap map = await session.Call(request) as G2C_EnterMap;// 这里去看服务器端的逻辑
+            // 进入地图成功：  Net_id = 1732270104318435333 爱表哥，爱生活！！！
+            Debug.Log($"进入地图成功：  Net_id = {map.MyId}"); // 这里是客户端逻辑，客户端说消息发完就成功了，但是服务器可能还并没有处理这个消息？【总之，服务器端还有个小错】
         }
         catch (Exception e) {
             isconnected = false;
